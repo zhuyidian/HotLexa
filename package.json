@@ -1,0 +1,17 @@
+{
+  "name": "hotlexa",
+  "version": "0.1.0",
+  "description": "Generate WeChat-ready articles from a word or sentence.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "generate": "node ./src/cli.js generate",
+    "dryrun": "node ./src/cli.js dryrun",
+    "wechat:dryrun": "node ./src/cli.js publish --dry-run",
+    "wechat:publish": "node ./src/cli.js publish",
+    "smoke": "node ./src/cli.js dryrun \"AI 手机\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

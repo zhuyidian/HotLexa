@@ -1,0 +1,25 @@
+{
+  "runRoot": ".runs/hotlexa",
+  "article": {
+    "defaultAuthor": "HotLexa",
+    "tone": "clear, timely, analytical",
+    "targetLength": "1200-1800 Chinese characters"
+  },
+  "sources": {
+    "registryPath": "config/source-registry.json",
+    "officialFirst": true,
+    "maxItems": 20,
+    "maxTasksPerCategory": 6,
+    "enabledCollectors": [
+      "web",
+      "official",
+      "cn-authority",
+      "x",
+      "youtube"
+    ]
+  },
+  "wechat": {
+    "dryRunOnlyByDefault": true,
+    "coverImageMediaId": ""
+  }
+}

@@ -1,0 +1,192 @@
+[
+  {
+    "id": "openai-news",
+    "name": "OpenAI News",
+    "domain": "openai.com",
+    "platform": "official",
+    "region": "global",
+    "authorityScore": 100,
+    "topics": ["ai", "model", "product", "policy"],
+    "assetPolicy": "official-press-needs-review"
+  },
+  {
+    "id": "google-blog",
+    "name": "Google Blog",
+    "domain": "blog.google",
+    "platform": "official",
+    "region": "global",
+    "authorityScore": 98,
+    "topics": ["ai", "search", "android", "youtube"],
+    "assetPolicy": "official-press-needs-review"
+  },
+  {
+    "id": "microsoft-blog",
+    "name": "Microsoft Blog",
+    "domain": "blogs.microsoft.com",
+    "platform": "official",
+    "region": "global",
+    "authorityScore": 98,
+    "topics": ["ai", "cloud", "product", "enterprise"],
+    "assetPolicy": "official-press-needs-review"
+  },
+  {
+    "id": "nvidia-news",
+    "name": "NVIDIA Newsroom",
+    "domain": "nvidianews.nvidia.com",
+    "platform": "official",
+    "region": "global",
+    "authorityScore": 98,
+    "topics": ["ai", "chip", "gpu", "data-center"],
+    "assetPolicy": "official-press-needs-review"
+  },
+  {
+    "id": "miit",
+    "name": "工信部",
+    "domain": "miit.gov.cn",
+    "platform": "official",
+    "region": "cn",
+    "authorityScore": 100,
+    "topics": ["ai", "telecom", "industry", "policy"],
+    "assetPolicy": "needs-review"
+  },
+  {
+    "id": "cac",
+    "name": "国家网信办",
+    "domain": "cac.gov.cn",
+    "platform": "official",
+    "region": "cn",
+    "authorityScore": 100,
+    "topics": ["ai", "internet", "policy", "security"],
+    "assetPolicy": "needs-review"
+  },
+  {
+    "id": "samr",
+    "name": "市场监管总局",
+    "domain": "samr.gov.cn",
+    "platform": "official",
+    "region": "cn",
+    "authorityScore": 98,
+    "topics": ["consumer", "platform", "policy", "regulation"],
+    "assetPolicy": "needs-review"
+  },
+  {
+    "id": "xinhua",
+    "name": "新华社",
+    "domain": "xinhuanet.com",
+    "platform": "cn-authority",
+    "region": "cn",
+    "authorityScore": 94,
+    "topics": ["policy", "economy", "technology", "society"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "cctv",
+    "name": "央视新闻",
+    "domain": "cctv.com",
+    "platform": "cn-authority",
+    "region": "cn",
+    "authorityScore": 92,
+    "topics": ["policy", "society", "technology"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "people",
+    "name": "人民网",
+    "domain": "people.com.cn",
+    "platform": "cn-authority",
+    "region": "cn",
+    "authorityScore": 90,
+    "topics": ["policy", "economy", "society"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "caixin",
+    "name": "财新",
+    "domain": "caixin.com",
+    "platform": "cn-media",
+    "region": "cn",
+    "authorityScore": 86,
+    "topics": ["business", "economy", "technology"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "jiemian",
+    "name": "界面新闻",
+    "domain": "jiemian.com",
+    "platform": "cn-media",
+    "region": "cn",
+    "authorityScore": 78,
+    "topics": ["business", "technology", "consumer"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "thepaper",
+    "name": "澎湃新闻",
+    "domain": "thepaper.cn",
+    "platform": "cn-media",
+    "region": "cn",
+    "authorityScore": 78,
+    "topics": ["policy", "society", "technology"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "reuters",
+    "name": "Reuters",
+    "domain": "reuters.com",
+    "platform": "web",
+    "region": "global",
+    "authorityScore": 88,
+    "topics": ["business", "technology", "world"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "ap",
+    "name": "Associated Press",
+    "domain": "apnews.com",
+    "platform": "web",
+    "region": "global",
+    "authorityScore": 86,
+    "topics": ["world", "business", "technology"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "bbc",
+    "name": "BBC",
+    "domain": "bbc.com",
+    "platform": "web",
+    "region": "global",
+    "authorityScore": 82,
+    "topics": ["world", "technology", "business"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "theverge",
+    "name": "The Verge",
+    "domain": "theverge.com",
+    "platform": "web",
+    "region": "global",
+    "authorityScore": 76,
+    "topics": ["technology", "product", "ai"],
+    "assetPolicy": "media-needs-review"
+  },
+  {
+    "id": "x-platform",
+    "name": "X",
+    "domain": "x.com",
+    "platform": "x",
+    "region": "global",
+    "authorityScore": 45,
+    "topics": ["signal", "executive", "breaking"],
+    "assetPolicy": "social-needs-review"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "domain": "youtube.com",
+    "platform": "youtube",
+    "region": "global",
+    "authorityScore": 52,
+    "topics": ["video", "launch", "interview", "review"],
+    "assetPolicy": "thumbnail-needs-review"
+  }
+]
