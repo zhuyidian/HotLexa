@@ -1,25 +1,109 @@
 {
-  "runRoot": ".runs/hotlexa",
-  "article": {
-    "defaultAuthor": "HotLexa",
-    "tone": "clear, timely, analytical",
-    "targetLength": "1200-1800 Chinese characters"
+  "runDir": ".runs",
+  "authorityRegistryPath": "config/authority-registry.json",
+  "collection": {
+    "maxItemsPerChannel": 8,
+    "youtubeTranscriptTopN": 3,
+    "webMaxItems": 8,
+    "webCommunityMaxItemsPerSource": 3,
+    "bilibiliMaxItemsPerTier": 5,
+    "requestTimeoutMs": 15000
   },
   "sources": {
-    "registryPath": "config/source-registry.json",
-    "officialFirst": true,
-    "maxItems": 20,
-    "maxTasksPerCategory": 6,
-    "enabledCollectors": [
-      "web",
-      "official",
-      "cn-authority",
-      "x",
-      "youtube"
-    ]
+    "youtube": {
+      "enabled": true,
+      "provider": "serper-first"
+    },
+    "x": {
+      "enabled": true,
+      "provider": "serper-first"
+    },
+    "bilibili": {
+      "enabled": true,
+      "provider": "serper-first"
+    },
+    "web": {
+      "enabled": true,
+      "provider": "serper-or-planned"
+    }
+  },
+  "searchStrategy": {
+    "tiers": ["official", "authoritative", "high-signal"],
+    "includeHighSignalAsEvidence": false,
+    "xMaxAccountsPerTier": 6,
+    "youtubeMaxChannelsPerTier": 5,
+    "bilibiliMaxChannelsPerTier": 5
+  },
+  "ranking": {
+    "enabled": true,
+    "selectedLimit": 24,
+    "minScore": 35,
+    "minRelevanceScore": 20,
+    "platformMax": {
+      "youtube": 6,
+      "x": 4,
+      "bilibili": 5,
+      "web": 9
+    },
+    "authorityMax": {
+      "official": 8,
+      "authoritative": 8,
+      "high-signal": 6,
+      "community-signal": 8,
+      "known-source": 5,
+      "unverified": 3
+    }
+  },
+  "writer": {
+    "author": "HotLexa",
+    "tone": "clear, evidence-based, suitable for a Chinese WeChat official account",
+    "defaultTitlePrefix": "",
+    "humanizerSkillPath": ".agents/skills/humanizer",
+    "generateHumanizerRequest": true
+  },
+  "wechatRenderer": {
+    "enabled": true,
+    "skillPath": ".agents/skills/baoyu-markdown-to-html",
+    "theme": "default",
+    "color": "blue",
+    "cite": true
+  },
+  "enrich": {
+    "enabled": true,
+    "skillPath": ".agents/skills/baoyu-url-to-markdown",
+    "youtubeTranscriptSkillPath": ".agents/skills/baoyu-youtube-transcript",
+    "youtubeTranscriptLanguages": "zh,en",
+    "outputDir": "enriched",
+    "timeoutMs": 45000,
+    "downloadMedia": false,
+    "waitForInteraction": false,
+    "chromeProfileDir": ""
+  },
+  "xBrowserFallback": {
+    "enabled": true,
+    "skillPath": ".agents/skills/baoyu-url-to-markdown",
+    "outputDir": "x-browser",
+    "timeoutMs": 60000,
+    "waitForInteraction": true,
+    "downloadMedia": false,
+    "chromeProfileDir": ""
+  },
+  "capture": {
+    "enabled": true,
+    "outputDir": "assets/screenshots",
+    "chromePath": "",
+    "chromeProfileDir": "",
+    "headless": true,
+    "windowWidth": 1365,
+    "windowHeight": 1600,
+    "timeoutMs": 45000
   },
   "wechat": {
-    "dryRunOnlyByDefault": true,
-    "coverImageMediaId": ""
+    "enabled": true,
+    "skillPath": ".agents/skills/baoyu-post-to-wechat",
+    "theme": "default",
+    "color": "blue",
+    "author": "HotLexa",
+    "publishMethod": "api"
   }
 }

@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "youtube": {
+    "officialChannels": [
+      { "name": "OpenAI", "handle": "@OpenAI" },
+      { "name": "Google", "handle": "@Google" },
+      { "name": "Google DeepMind", "handle": "@GoogleDeepMind" },
+      { "name": "Microsoft", "handle": "@Microsoft" },
+      { "name": "NVIDIA", "handle": "@NVIDIA" },
+      { "name": "Apple", "handle": "@Apple" },
+      { "name": "Meta", "handle": "@Meta" },
+      { "name": "Anthropic", "handle": "@Anthropic" }
+    ],
+    "authoritativeChannels": [
+      { "name": "Bloomberg Technology", "handle": "@BloombergTechnology" },
+      { "name": "CNBC Television", "handle": "@CNBCtelevision" },
+      { "name": "The Verge", "handle": "@TheVerge" },
+      { "name": "Wall Street Journal", "handle": "@wsj" },
+      { "name": "BBC News", "handle": "@BBCNews" }
+    ],
+    "highSignalCreators": [
+      { "name": "Marques Brownlee", "handle": "@mkbhd" },
+      { "name": "Dave2D", "handle": "@Dave2D" },
+      { "name": "Mrwhosetheboss", "handle": "@Mrwhosetheboss" },
+      { "name": "Linus Tech Tips", "handle": "@LinusTechTips" },
+      { "name": "The Decoder", "handle": "@TheDecoder" }
+    ]
+  },
+  "x": {
+    "officialAccounts": [
+      { "name": "OpenAI", "handle": "OpenAI" },
+      { "name": "Google DeepMind", "handle": "GoogleDeepMind" },
+      { "name": "Google AI", "handle": "GoogleAI" },
+      { "name": "Microsoft", "handle": "Microsoft" },
+      { "name": "NVIDIA AI", "handle": "NVIDIAAI" },
+      { "name": "Apple", "handle": "Apple" },
+      { "name": "Meta", "handle": "Meta" },
+      { "name": "Anthropic", "handle": "AnthropicAI" }
+    ],
+    "authoritativeAccounts": [
+      { "name": "Reuters", "handle": "Reuters" },
+      { "name": "The Associated Press", "handle": "AP" },
+      { "name": "BBC World", "handle": "BBCWorld" },
+      { "name": "Bloomberg", "handle": "business" },
+      { "name": "The Verge", "handle": "verge" }
+    ],
+    "highSignalAccounts": [
+      { "name": "Marques Brownlee", "handle": "MKBHD" },
+      { "name": "Ben Bajarin", "handle": "BenBajarin" },
+      { "name": "Joanna Stern", "handle": "JoannaStern" },
+      { "name": "Mark Gurman", "handle": "markgurman" },
+      { "name": "The Decoder", "handle": "TheDecoder" }
+    ]
+  },
+  "bilibili": {
+    "officialChannels": [
+      { "name": "微软科技" },
+      { "name": "NVIDIA英伟达" },
+      { "name": "Intel中国" },
+      { "name": "联想" },
+      { "name": "华为终端" }
+    ],
+    "authoritativeChannels": [
+      { "name": "央视新闻" },
+      { "name": "新华社" },
+      { "name": "36氪" },
+      { "name": "钛媒体APP" },
+      { "name": "量子位" }
+    ],
+    "highSignalCreators": [
+      { "name": "影视飓风" },
+      { "name": "老师好我叫何同学" },
+      { "name": "极客湾Geekerwan" },
+      { "name": "差评君" },
+      { "name": "科技美学" }
+    ]
+  },
+  "web": {
+    "officialDomains": [
+      "openai.com",
+      "deepmind.google",
+      "ai.google",
+      "microsoft.com",
+      "blogs.microsoft.com",
+      "nvidia.com",
+      "apple.com",
+      "about.fb.com",
+      "anthropic.com"
+    ],
+    "authoritativeDomains": [
+      "reuters.com",
+      "apnews.com",
+      "bbc.com",
+      "bloomberg.com",
+      "theverge.com",
+      "wsj.com",
+      "technologyreview.com",
+      "wired.com"
+    ],
+    "communitySources": [
+      {
+        "name": "LINUX DO",
+        "url": "https://linux.do/",
+        "domain": "linux.do",
+        "siteQuery": "site:linux.do",
+        "category": "community"
+      },
+      {
+        "name": "阮一峰的网络日志周刊",
+        "url": "https://github.com/ruanyf/weekly",
+        "domain": "github.com",
+        "siteQuery": "site:github.com/ruanyf/weekly",
+        "category": "weekly"
+      },
+      {
+        "name": "今日热榜新闻",
+        "url": "https://tophub.today/c/news",
+        "domain": "tophub.today",
+        "siteQuery": "site:tophub.today/c/news",
+        "category": "trend"
+      },
+      {
+        "name": "Hacker News",
+        "url": "https://news.ycombinator.com/",
+        "domain": "news.ycombinator.com",
+        "siteQuery": "site:news.ycombinator.com",
+        "category": "community"
+      },
+      {
+        "name": "DEV Community",
+        "url": "https://dev.to/",
+        "domain": "dev.to",
+        "siteQuery": "site:dev.to",
+        "category": "developer-community"
+      }
+    ]
+  }
+}

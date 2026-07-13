@@ -1,122 +1,152 @@
-export async function buildArticleDraft({ query, research, config }) {
-  const title = buildTitle(query);
-  const evidenceItems = research.items || [];
-  const sourceRows = evidenceItems.length
-    ? evidenceItems.map(formatEvidenceLine)
-    : research.queryPlan.tasks.slice(0, 12).map(formatPlanLine);
+import { compactText } from "../utils.js";
 
-  const markdown = [
-    `# ${title}`,
-    "",
-    `> 选题：${query}`,
-    "",
-    "## 先说结论",
-    "",
-    buildLead({ query, research }),
-    "",
-    "## 信息源策略",
-    "",
-    ...formatCoverage(research.sourceCoverage),
-    "",
-    "## 文章主线",
-    "",
-    ...buildBodySections({ query, evidenceItems }),
-    "",
-    "## 证据与线索",
-    "",
-    ...sourceRows,
-    "",
-    "## 图片素材规则",
-    "",
-    ...formatAssetRules(research),
-    "",
-    "## 下一步",
-    "",
-    "接入真实搜索、X、YouTube 和 AI 写作适配器后，这里会替换为基于实时来源的完整公众号正文。正式创建公众号草稿前，仍然先跑 DryRun。"
-  ].join("\n");
-
-  return {
-    title,
-    author: config.defaults.article?.defaultAuthor || "HotLexa",
-    digest: `${query} 的多源信息汇总与公众号文章草稿。`,
-    contentSourceUrl: evidenceItems[0]?.url || "",
-    markdown
-  };
-}
-
-function buildTitle(query) {
-  return `${query}：发生了什么，为什么值得关注`;
-}
-
-function buildLead({ query, research }) {
-  if (research.mode === "multi-source-planned") {
-    return `HotLexa 已经为“${query}”生成多源检索计划，覆盖官方原始源、国内权威媒体、国外主流媒体、X 平台和 YouTube。当前还没有配置真实 API 密钥，所以这次先输出可审核的采集计划和公众号格式化草稿。`;
-  }
-
-  return `HotLexa 已经围绕“${query}”采集到 ${research.items.length} 条候选证据，并按权威性、时效性和证据类型完成初步排序。`;
-}
-
-function formatCoverage(sourceCoverage = {}) {
-  const rows = Object.entries(sourceCoverage).map(([platform, coverage]) => {
-    return `- ${platform}：计划 ${coverage.planned} 条，已采集 ${coverage.collected} 条`;
-  });
-
-  return rows.length ? rows : ["- 尚未生成来源覆盖统计"];
-}
-
-function buildBodySections({ query, evidenceItems }) {
-  if (!evidenceItems.length) {
-    return [
-      `围绕“${query}”，正文会先判断它是政策、产品、公司、行业还是社会议题，再把信息拆成“发生了什么、谁在推动、影响是什么、哪些仍待确认”四个部分。`
-    ];
-  }
-
-  const topItems = evidenceItems.slice(0, 4);
-  const summaries = topItems.map((item) => item.summary).filter(Boolean);
+export function buildArticleDraft({ evidence, config }) {
+  const title = `${config.writer?.defaultTitlePrefix || ""}${evidence.query}`;
+  const selectedItems = getSelectedItems(evidence);
+  const officialItems = selectedItems.filter((item) => item.authority.level === "official");
+  const authoritativeItems = selectedItems.filter((item) => item.authority.level === "authoritative");
+  const highSignalItems = selectedItems.filter(
+    (item) => item.authority.level === "high-signal" || item.metrics?.searchTier === "high-signal" || item.evidenceType === "social-signal"
+  );
+  const otherItems = selectedItems.filter(
+    (item) => !["official", "authoritative"].includes(item.authority.level) && !highSignalItems.includes(item)
+  );
 
   return [
-    "### 发生了什么",
+    "---",
+    `title: "${escapeYaml(title)}"`,
+    `author: "${escapeYaml(config.writer?.author || config.wechat?.author || "HotLexa")}"`,
+    `description: "${escapeYaml(`围绕 ${evidence.query} 的权威信息整理`)}"`,
+    "---",
     "",
-    `从当前抓取到的候选来源看，“${query}”相关讨论主要集中在产品能力、系统级 AI 功能、厂商生态和用户体验差异上。`,
+    `# ${title}`,
     "",
-    ...summaries.slice(0, 2).map((summary) => `${compress(summary)}`),
+    "## 核心判断",
     "",
-    "### 为什么值得关注",
+    buildLead(evidence),
     "",
-    "这类选题的价值不只在于单个产品参数，而在于 AI 能力是否开始进入手机系统的默认工作流：拍照、搜索、语音助手、内容生成、跨应用操作和隐私保护都会被重新定义。",
+    "## 官方与权威证据",
     "",
-    "### 还需要确认什么",
+    renderItems([...officialItems, ...authoritativeItems], "暂无已采集的官方或权威证据。"),
     "",
-    "目前本地闭环优先保证采集和排版可运行。正式发稿前，应继续补充官方发布页、厂商新闻稿、权威媒体报道，以及 X/YouTube 上来自官方账号或核心从业者的一手信号。社媒和视频素材只作为线索，不能单独作为事实结论。",
+    "## 高热度讨论信号",
     "",
-    "### 编辑判断",
+    renderItems(highSignalItems, "暂无已采集的高热度个人账号或创作者信号。"),
     "",
-    `如果“${query}”最终要写成公众号文章，建议把主线放在“AI 功能是否真正改变手机使用方式”，而不是只做型号或功能清单。这样读者能同时看到事实、变化和判断。`
-  ];
+    "## 其它可参考信息",
+    "",
+    renderItems(otherItems, "暂无其它已采集信息。"),
+    "",
+    "## 截图与素材待办",
+    "",
+    renderAssetTodos(evidence),
+    "",
+    "## 参考链接",
+    "",
+    renderReferences(selectedItems),
+    ""
+  ].join("\n");
 }
 
-function compress(text) {
-  const cleaned = text.replace(/\s+/g, " ").trim();
-  if (cleaned.length <= 220) return cleaned;
-  return `${cleaned.slice(0, 219)}…`;
+export function buildHumanizerRequest({ evidencePath, draftPath, outputPath }) {
+  return [
+    "# Humanizer Request",
+    "",
+    "请使用项目内 `.agents/skills/humanizer` 的规则，对公众号初稿进行人味化润色。",
+    "",
+    "输入文件：",
+    "",
+    `- 证据包：${evidencePath}`,
+    `- 初稿：${draftPath}`,
+    "",
+    "输出建议：",
+    "",
+    `- 润色后的 Markdown 保存为：${outputPath}`,
+    "",
+    "要求：",
+    "",
+    "1. 不新增证据包之外的事实。",
+    "2. 保留官方/权威来源优先级。",
+    "3. 高流量个人账号只作为讨论信号，不作为事实主证据。",
+    "4. 删掉明显 AI 腔、空泛判断、过度排比和不必要的连接词。",
+    "5. 中文表达自然、直接，适合公众号阅读。",
+    ""
+  ].join("\n");
 }
 
-function formatEvidenceLine(item, index) {
-  return `${index + 1}. [${item.title}](${item.url})｜${item.source}｜${item.evidenceType}｜评分 ${item.score}`;
-}
-
-function formatPlanLine(task, index) {
-  return `${index + 1}. ${task.sourceName}｜${task.evidenceType}｜${task.query}`;
-}
-
-function formatAssetRules(research) {
-  if (research.assetCandidates?.length) {
-    return research.assetCandidates.slice(0, 8).map((asset, index) => {
-      return `${index + 1}. ${asset.sourceTitle || asset.sourceName}｜${asset.licenseStatus}｜${asset.canAutoUse ? "可自动使用" : "需人工确认"}`;
-    });
+function buildLead(evidence) {
+  if (evidence.items.length === 0) {
+    return [
+      "当前还没有拿到实时证据，系统已经生成待采集任务。",
+      "下一步应先补齐 YouTube、X 和官网/权威媒体来源，再进入润色。"
+    ].join("\n\n");
   }
 
-  return research.plannedAssetRules.slice(0, 8).map((rule, index) => {
-    return `${index + 1}. ${rule.sourceName}｜${rule.platform}｜${rule.licenseStatus}｜默认需人工确认`;
-  });
+  const officialCount = evidence.summary.selectedByAuthority?.official || 0;
+  const authoritativeCount = evidence.summary.selectedByAuthority?.authoritative || 0;
+  const selectedCount = evidence.summary.selectedCount || getSelectedItems(evidence).length;
+  const highSignalCount = getSelectedItems(evidence).filter((item) => item.authority.level === "high-signal" || item.metrics?.searchTier === "high-signal").length;
+  return `本次围绕「${evidence.query}」共整理 ${evidence.items.length} 条证据，评分器精选 ${selectedCount} 条进入初稿。其中官方来源 ${officialCount} 条，权威来源 ${authoritativeCount} 条，高热度讨论信号 ${highSignalCount} 条。下面先保留事实骨架，后续可在 Codex 会话中直接基于证据包和初稿润色成公众号文章。`;
+}
+
+function renderItems(items, emptyText) {
+  if (!items.length) return emptyText;
+  return items
+    .map((item) => {
+      const source = [item.sourceName || item.author, item.publishedAt].filter(Boolean).join(" · ");
+      const tier = item.metrics?.searchTier ? `搜索层级：${item.metrics.searchTier}` : "";
+      const ranking = item.ranking ? `推荐分：${item.ranking.score}（${item.ranking.reasons?.slice(0, 3).join("；")}）` : "";
+      return [
+        `### ${item.title || item.url || item.id}`,
+        "",
+        source ? `来源：${source}` : "",
+        `可信度：${item.authority.level} (${item.authority.score})`,
+        ranking,
+        tier,
+        item.summary ? `要点：${compactText(item.summary, 400)}` : "",
+        item.rawText ? `摘录：${compactText(item.rawText, 500)}` : "",
+        item.url ? `链接：${item.url}` : ""
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n\n");
+}
+
+function renderAssetTodos(evidence) {
+  const todos = [];
+  for (const item of evidence.items) {
+    for (const asset of item.assets || []) {
+      if (asset.type === "screenshot" && asset.status === "planned") {
+        todos.push(`- ${item.platform}: ${item.sourceName || item.author || item.title} -> ${asset.targetUrl}`);
+      }
+    }
+  }
+  if (todos.length) return todos.join("\n");
+  if (evidence.plannedItems.length) {
+    return evidence.plannedItems
+      .map((item) => `- ${item.platform}/${item.tier || "general"}: ${item.action} (${item.reason})`)
+      .join("\n");
+  }
+  return "暂无截图待办。";
+}
+
+function renderReferences(items) {
+  const refs = items
+    .filter((item) => item.url)
+    .map((item, index) => `${index + 1}. ${item.title || item.sourceName || item.platform}: ${item.url}`);
+  return refs.length ? refs.join("\n") : "暂无参考链接。";
+}
+
+function getSelectedItems(evidence) {
+  const items = evidence.items || [];
+  const hasSelection = items.some((item) => typeof item.selected === "boolean");
+  const selected = hasSelection ? items.filter((item) => item.selected) : items;
+  return [...selected].sort(
+    (a, b) => (b.ranking?.score || 0) - (a.ranking?.score || 0) || (a.ranking?.sourceOrder || 0) - (b.ranking?.sourceOrder || 0)
+  );
+}
+
+function escapeYaml(value) {
+  return String(value || "").replace(/"/g, '\\"');
 }

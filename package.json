@@ -1,17 +1,17 @@
 {
   "name": "hotlexa",
   "version": "0.1.0",
-  "description": "Generate WeChat-ready articles from a word or sentence.",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "description": "Authority-first research pipeline for WeChat official account drafts.",
+  "bin": {
+    "hotlexa": "./src/cli.js"
+  },
   "scripts": {
-    "generate": "node ./src/cli.js generate",
-    "dryrun": "node ./src/cli.js dryrun",
-    "wechat:dryrun": "node ./src/cli.js publish --dry-run",
-    "wechat:publish": "node ./src/cli.js publish",
-    "smoke": "node ./src/cli.js dryrun \"AI 手机\""
+    "check": "node --check src/cli.js && node --check src/pipeline.js && node --check src/research/enricher.js && node --check src/research/xBrowserFallback.js && node --check src/capture/screenshotCapture.js",
+    "run": "node ./src/cli.js run"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   }
 }

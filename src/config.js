@@ -1,24 +1,18 @@
-import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { deepMerge, readJson } from "./utils.js";
 
-async function readJsonIfExists(filePath, fallback) {
-  try {
-    const raw = await fs.readFile(filePath, "utf8");
-    return JSON.parse(raw);
-  } catch (error) {
-    if (error.code === "ENOENT") return fallback;
-    throw error;
-  }
-}
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+export const projectRoot = path.resolve(__dirname, "..");
 
 export async function loadConfig() {
-  const root = process.cwd();
-  const defaults = await readJsonIfExists(path.join(root, "config/defaults.json"), {});
-  const secrets = await readJsonIfExists(path.join(root, "config/local.secrets.json"), {});
+  const defaultsPath = path.join(projectRoot, "config", "defaults.json");
+  const localSecretsPath = path.join(projectRoot, "config", "local.secrets.json");
+  const defaults = await readJson(defaultsPath, {});
+  const localSecrets = await readJson(localSecretsPath, {});
+  return deepMerge(defaults, localSecrets);
+}
 
-  return {
-    root,
-    defaults,
-    secrets
-  };
+export function resolveProjectPath(...parts) {
+  return path.resolve(projectRoot, ...parts);
 }
