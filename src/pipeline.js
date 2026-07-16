@@ -63,7 +63,7 @@ export async function runPipeline({ query, publish = false, dryRun = true }) {
 
 function buildPolishRequest(query, evidencePath, draftPath, humanizerRequestPath) {
   return [
-    `请基于下面文件，把「${query}」整理润色成一篇公众号草稿：`,
+    `请基于下面文件，把「${query}」整理重写成一篇可直接发布的公众号文章：`,
     "",
     `- 证据包：${evidencePath}`,
     `- 初稿：${draftPath}`,
@@ -72,11 +72,13 @@ function buildPolishRequest(query, evidencePath, draftPath, humanizerRequestPath
     "要求：",
     "",
     "1. 只使用证据包里能追溯到来源的信息，不要编造。",
-    "2. 保留官方/权威来源的优先级。",
-    "3. 高流量个人账号只作为讨论信号，不作为事实主证据。",
-    "4. 按 `.agents/skills/humanizer` 的规则去掉明显 AI 腔。",
-    "5. 如证据不足，明确标注需要补采的来源或截图。",
-    "6. 输出可直接交给公众号发布流程的 Markdown。",
+    "2. 最终稿必须是完整、连续、读者视角的文章，不要写成渠道采集报告、证据清单或内部分析备忘录。",
+    "3. 正文不要出现渠道相关名称、站点名、账号名、频道名、抓取工具名或“采集到/证据包/评分器/初稿/润色”这类内部流程词。",
+    "4. 保留官方/权威来源的优先级；高流量个人账号和用户讨论只作为传播或情绪信号，不作为事实主证据。",
+    "5. 从证据中抽取可用图片或截图，并插入到最相关的正文位置；图片说明解释内容关系，不要暴露渠道名。",
+    "6. 按 `.agents/skills/humanizer` 的规则去掉明显 AI 腔、空泛判断、过度排比和不必要的连接词。",
+    "7. 如证据不足，可以在判断上保守，但不要在正文里写内部待办。",
+    "8. 输出可直接交给公众号发布流程的 Markdown。",
     ""
   ].join("\n");
 }

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildBunCommand, formatSpawnError } from "../bunRunner.js";
 import { projectRoot } from "../config.js";
 import { compactText, ensureDir, pathExists, readJson, slugify, writeJson, writeText } from "../utils.js";
 import { refreshEvidenceSummary } from "./evidence.js";
@@ -79,9 +80,7 @@ async function runXSearchCapture({ task, outputRoot, config }) {
   await ensureDir(taskDir);
   const outputPath = path.join(taskDir, "document.json");
   const debugDir = path.join(taskDir, "debug");
-  const command = resolveBunCommand();
-  const args = [
-    ...command.args,
+  const runtimeArgs = [
     cliPath,
     task.searchUrl,
     "--format",
@@ -96,8 +95,10 @@ async function runXSearchCapture({ task, outputRoot, config }) {
     String(config.xBrowserFallback?.timeoutMs || 60000)
   ];
 
-  if (config.xBrowserFallback?.downloadMedia) args.push("--download-media");
-  if (config.xBrowserFallback?.waitForInteraction !== false) args.push("--wait-for", "interaction");
+  if (config.xBrowserFallback?.downloadMedia) runtimeArgs.push("--download-media");
+  if (config.xBrowserFallback?.waitForInteraction !== false) runtimeArgs.push("--wait-for", "interaction");
+  runtimeArgs.push("--chrome-profile-dir", resolveXChromeProfileDir(config));
+  const command = buildBunCommand(runtimeArgs);
 
   const env = { ...process.env };
   if (config.xBrowserFallback?.chromeProfileDir) {
@@ -105,7 +106,7 @@ async function runXSearchCapture({ task, outputRoot, config }) {
   }
 
   const startedAt = new Date().toISOString();
-  const run = spawnSync(command.bin, args, {
+  const run = spawnSync(command.bin, command.args, {
     cwd: projectRoot,
     env,
     encoding: "utf8",
@@ -120,7 +121,7 @@ async function runXSearchCapture({ task, outputRoot, config }) {
       debugDir,
       startedAt,
       finishedAt: new Date().toISOString(),
-      error: compactText(run.stderr || run.stdout || `exit ${run.status}`, 1000)
+      error: compactText(formatSpawnError(run), 1000)
     };
   }
 
@@ -217,9 +218,6 @@ function authorityForTaskTier(task) {
   };
 }
 
-function resolveBunCommand() {
-  return {
-    bin: process.platform === "win32" ? "npx.cmd" : "npx",
-    args: ["-y", "bun"]
-  };
+function resolveXChromeProfileDir(config) {
+  return path.resolve(projectRoot, config.xBrowserFallback?.chromeProfileDir || ".cache/chrome/x-browser");
 }

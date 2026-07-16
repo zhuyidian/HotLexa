@@ -1,5 +1,7 @@
 .runs/
+.cache/
 config/local.secrets.json
+.baoyu-skills/.env
 node_modules/
 .DS_Store
 Thumbs.db

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildBunCommand, formatSpawnError } from "../bunRunner.js";
 import { projectRoot } from "../config.js";
 import { compactText, ensureDir, pathExists, readJson, slugify, writeJson, writeText } from "../utils.js";
 import { refreshEvidenceSummary } from "./evidence.js";
@@ -19,8 +20,10 @@ export async function enrichEvidenceFile({ evidencePath, config, dryRun = false,
     throw new Error(`baoyu-url-to-markdown CLI not found: ${cliPath}`);
   }
 
-  const candidates = (evidence.items || [])
-    .filter((item) => item.url)
+  const itemsWithUrls = (evidence.items || []).filter((item) => item.url);
+  const selectionEnabled = config.enrich?.selectedOnly !== false && itemsWithUrls.some((item) => item.selected);
+  const enrichScope = selectionEnabled ? itemsWithUrls.filter((item) => item.selected) : itemsWithUrls;
+  const candidates = enrichScope
     .filter((item) => force || item.enrichment?.status !== "ok")
     .slice(0, Number.isFinite(limit) ? limit : undefined);
 
@@ -30,6 +33,7 @@ export async function enrichEvidenceFile({ evidencePath, config, dryRun = false,
     outputRoot,
     dryRun,
     count: candidates.length,
+    selectedOnly: selectionEnabled,
     items: candidates.map((item) => ({ id: item.id, platform: item.platform, url: item.url }))
   });
 
@@ -68,9 +72,7 @@ async function enrichItem({ item, cliPath, outputRoot, config }) {
   }
 
   const outputPath = path.join(itemDir, "document.json");
-  const command = resolveBunCommand();
-  const args = [
-    ...command.args,
+  const runtimeArgs = [
     cliPath,
     item.url,
     "--format",
@@ -82,9 +84,11 @@ async function enrichItem({ item, cliPath, outputRoot, config }) {
   ];
 
   const adapter = adapterForPlatform(item.platform);
-  if (adapter) args.push("--adapter", adapter);
-  if (config.enrich?.downloadMedia) args.push("--download-media");
-  if (config.enrich?.waitForInteraction) args.push("--wait-for", "interaction");
+  if (adapter) runtimeArgs.push("--adapter", adapter);
+  runtimeArgs.push("--chrome-profile-dir", resolveEnrichChromeProfileDir({ item, config }));
+  if (config.enrich?.downloadMedia) runtimeArgs.push("--download-media");
+  if (config.enrich?.waitForInteraction) runtimeArgs.push("--wait-for", "interaction");
+  const command = buildBunCommand(runtimeArgs);
 
   const env = { ...process.env };
   if (config.enrich?.chromeProfileDir) {
@@ -92,7 +96,7 @@ async function enrichItem({ item, cliPath, outputRoot, config }) {
   }
 
   const startedAt = new Date().toISOString();
-  const result = spawnSync(command.bin, args, {
+  const result = spawnSync(command.bin, command.args, {
     cwd: projectRoot,
     env,
     encoding: "utf8",
@@ -107,12 +111,25 @@ async function enrichItem({ item, cliPath, outputRoot, config }) {
         outputPath,
         startedAt,
         finishedAt: new Date().toISOString(),
-        error: compactText(result.stderr || result.stdout || `exit ${result.status}`, 1000)
+        error: compactText(formatSpawnError(result), 1000)
       }
     };
   }
 
   const parsed = await readJson(outputPath, null);
+  if (!parsed) {
+    return {
+      enrichment: {
+        status: "failed",
+        provider: "baoyu-url-to-markdown",
+        outputPath,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        error: compactText(`No JSON output was written. ${formatSpawnError(result)}`, 1000)
+      }
+    };
+  }
+
   const status = parsed?.status || "ok";
   const markdown = parsed?.markdown || "";
   const document = parsed?.document || {};
@@ -145,11 +162,9 @@ async function enrichYoutubeTranscript({ item, itemDir, config }) {
   const scriptPath = path.join(skillPath, "scripts", "main.ts");
   if (!(await pathExists(scriptPath))) return null;
 
-  const command = resolveBunCommand();
   const outputPath = path.join(itemDir, "youtube-transcript.md");
   const cacheDir = path.join(itemDir, "youtube-transcript-cache");
-  const args = [
-    ...command.args,
+  const command = buildBunCommand([
     scriptPath,
     item.url,
     "--languages",
@@ -159,10 +174,10 @@ async function enrichYoutubeTranscript({ item, itemDir, config }) {
     outputPath,
     "--output-dir",
     cacheDir
-  ];
+  ]);
 
   const startedAt = new Date().toISOString();
-  const result = spawnSync(command.bin, args, {
+  const result = spawnSync(command.bin, command.args, {
     cwd: projectRoot,
     env: { ...process.env },
     encoding: "utf8",
@@ -204,9 +219,9 @@ function adapterForPlatform(platform) {
   return "generic";
 }
 
-function resolveBunCommand() {
-  return {
-    bin: process.platform === "win32" ? "npx.cmd" : "npx",
-    args: ["-y", "bun"]
-  };
+function resolveEnrichChromeProfileDir({ item, config }) {
+  if (config.enrich?.chromeProfileDir) {
+    return path.resolve(projectRoot, config.enrich.chromeProfileDir);
+  }
+  return path.join(projectRoot, ".cache", "chrome", "enrich", `${item.id}-${process.pid}-${Date.now()}`);
 }

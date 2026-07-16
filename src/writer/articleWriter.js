@@ -52,7 +52,7 @@ export function buildHumanizerRequest({ evidencePath, draftPath, outputPath }) {
   return [
     "# Humanizer Request",
     "",
-    "请使用项目内 `.agents/skills/humanizer` 的规则，对公众号初稿进行人味化润色。",
+    "请使用项目内 `.agents/skills/humanizer` 的规则，把初稿重写成一篇可直接发布的公众号正文。",
     "",
     "输入文件：",
     "",
@@ -66,10 +66,20 @@ export function buildHumanizerRequest({ evidencePath, draftPath, outputPath }) {
     "要求：",
     "",
     "1. 不新增证据包之外的事实。",
-    "2. 保留官方/权威来源优先级。",
-    "3. 高流量个人账号只作为讨论信号，不作为事实主证据。",
-    "4. 删掉明显 AI 腔、空泛判断、过度排比和不必要的连接词。",
-    "5. 中文表达自然、直接，适合公众号阅读。",
+    "2. 最终稿必须是一篇完整、连续、面向读者的文章，不要写成渠道采集报告、证据清单、内部分析备忘录或写作建议。",
+    "3. 正文不要出现渠道相关名称、站点名、账号名、频道名、抓取工具名或“采集到/证据包/评分器/初稿/润色”这类内部流程词。",
+    "4. 可以在内部使用官方/权威/外部解读/用户反馈的证据分层，但正文要自然表达为读者能理解的判断。",
+    "5. 高流量个人账号和用户讨论只作为传播或情绪信号，不作为事实主证据。",
+    "6. 从证据中抽取可用图片或截图，并插入到相关段落附近；图片说明要解释图片与该段内容的关系，不要暴露渠道名。",
+    "7. 删掉明显 AI 腔、空泛判断、过度排比和不必要的连接词。",
+    "8. 中文表达自然、直接，适合公众号阅读。",
+    "",
+    "最终稿自检：",
+    "",
+    "- 读者不需要知道信息来自哪些渠道，也能顺畅读完。",
+    "- 每张图都放在它最相关的段落附近。",
+    "- 参考来源可以保留必要的官方链接；非官方渠道链接不要作为正文重点展示。",
+    "- 如果图片不足，正文里不要抱怨缺图；只插入已经能确认相关的图片。",
     ""
   ].join("\n");
 }
@@ -77,8 +87,8 @@ export function buildHumanizerRequest({ evidencePath, draftPath, outputPath }) {
 function buildLead(evidence) {
   if (evidence.items.length === 0) {
     return [
-      "当前还没有拿到实时证据，系统已经生成待采集任务。",
-      "下一步应先补齐 YouTube、X 和官网/权威媒体来源，再进入润色。"
+      "当前还没有拿到足够事实材料，系统已经生成待补充任务。",
+      "下一步应先补齐官方材料、可信解读和可用图片，再进入成稿。"
     ].join("\n\n");
   }
 
@@ -86,7 +96,7 @@ function buildLead(evidence) {
   const authoritativeCount = evidence.summary.selectedByAuthority?.authoritative || 0;
   const selectedCount = evidence.summary.selectedCount || getSelectedItems(evidence).length;
   const highSignalCount = getSelectedItems(evidence).filter((item) => item.authority.level === "high-signal" || item.metrics?.searchTier === "high-signal").length;
-  return `本次围绕「${evidence.query}」共整理 ${evidence.items.length} 条证据，评分器精选 ${selectedCount} 条进入初稿。其中官方来源 ${officialCount} 条，权威来源 ${authoritativeCount} 条，高热度讨论信号 ${highSignalCount} 条。下面先保留事实骨架，后续可在 Codex 会话中直接基于证据包和初稿润色成公众号文章。`;
+  return `本次围绕「${evidence.query}」共整理 ${evidence.items.length} 条材料，其中 ${selectedCount} 条适合进入成稿参考。官方材料 ${officialCount} 条，权威材料 ${authoritativeCount} 条，高热度讨论信号 ${highSignalCount} 条。下面先保留事实骨架，最终成稿时需要改写成连续的读者视角文章。`;
 }
 
 function renderItems(items, emptyText) {

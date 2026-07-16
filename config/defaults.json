@@ -76,6 +76,7 @@
     "outputDir": "enriched",
     "timeoutMs": 45000,
     "downloadMedia": false,
+    "selectedOnly": true,
     "waitForInteraction": false,
     "chromeProfileDir": ""
   },
@@ -86,7 +87,7 @@
     "timeoutMs": 60000,
     "waitForInteraction": true,
     "downloadMedia": false,
-    "chromeProfileDir": ""
+    "chromeProfileDir": ".cache/chrome/x-browser"
   },
   "capture": {
     "enabled": true,
@@ -101,9 +102,9 @@
   "wechat": {
     "enabled": true,
     "skillPath": ".agents/skills/baoyu-post-to-wechat",
-    "theme": "default",
+    "theme": "modern",
     "color": "blue",
-    "author": "HotLexa",
+    "author": "一点IT+",
     "publishMethod": "api"
   }
 }

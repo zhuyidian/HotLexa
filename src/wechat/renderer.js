@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildBunCommand, formatCommand, formatSpawnError } from "../bunRunner.js";
 import { projectRoot } from "../config.js";
 import { pathExists } from "../utils.js";
 
@@ -18,27 +19,26 @@ export async function renderWechatHtml({ markdownPath, config, dryRun = false })
     };
   }
 
-  const command = resolveBunCommand();
-  const args = [
-    ...command.args,
+  const runtimeArgs = [
     scriptPath,
     markdownPath,
     "--theme",
     config.wechatRenderer?.theme || "default"
   ];
-  if (config.wechatRenderer?.color) args.push("--color", config.wechatRenderer.color);
-  if (config.wechatRenderer?.cite) args.push("--cite");
+  if (config.wechatRenderer?.color) runtimeArgs.push("--color", config.wechatRenderer.color);
+  if (config.wechatRenderer?.cite) runtimeArgs.push("--cite");
+  const command = buildBunCommand(runtimeArgs);
 
   if (dryRun) {
     return {
       ok: true,
       provider: "baoyu-markdown-to-html",
       dryRun: true,
-      command: [command.bin, ...args].join(" ")
+      command: formatCommand(command)
     };
   }
 
-  const result = spawnSync(command.bin, args, {
+  const result = spawnSync(command.bin, command.args, {
     cwd: projectRoot,
     env: { ...process.env },
     encoding: "utf8"
@@ -50,17 +50,11 @@ export async function renderWechatHtml({ markdownPath, config, dryRun = false })
     status: result.status,
     stdout: result.stdout,
     stderr: result.stderr,
+    error: result.status === 0 ? "" : formatSpawnError(result),
     htmlPath: inferHtmlPath(markdownPath)
   };
 }
 
 function inferHtmlPath(markdownPath) {
   return markdownPath.replace(/\.md$/i, ".html");
-}
-
-function resolveBunCommand() {
-  return {
-    bin: process.platform === "win32" ? "npx.cmd" : "npx",
-    args: ["-y", "bun"]
-  };
 }
